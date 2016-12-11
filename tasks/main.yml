@@ -38,7 +38,7 @@
                     dest=/etc/my.cnf.d/server.cnf
   notify:           restart mysql
 
-- include:          ../../user/tasks/main.yml
+- include:          jcid.ansible-role-server-mariadb-user
   vars:
     mysql_user:     root
     mysql_priv:     '*.*:ALL,GRANT'
@@ -48,7 +48,7 @@
   template:         src=client.cnf
                     dest=~/.my.cnf mode=0600
 
-- include:          ../../user/tasks/main.yml
+- include:          jcid.ansible-role-server-mariadb-user
   vars:
     mysql_user:     root
     mysql_priv:     '*.*:ALL,GRANT'
@@ -62,7 +62,7 @@
    - localhost
    - "{{ ansible_hostname }}"
 
-- include:          ../../user/tasks/main.yml
+- include:          jcid.ansible-role-server-mariadb-user
   vars:
     mysql_user:     jcid_admin
     mysql_hosts:    ["%"]
