@@ -1,0 +1,3 @@
+[client]
+user=root
+password={{ lookup('password', '~/jcid/repositories/webserver/ansible/files/credentials/' + inventory_hostname + '/mysql/root length=30 chars=ascii_letters') }}

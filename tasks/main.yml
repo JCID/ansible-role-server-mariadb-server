@@ -1,0 +1,72 @@
+---
+- name:             Install local repos
+  copy:             src=./mariadb-centos6.repo
+                    dest=/etc/yum.repos.d/mariadb.repo
+                    backup=yes
+  when:             'ansible_distribution == "CentOS" and ansible_distribution_major_version=="6"'
+
+- name:             Install local repos
+  copy:             src=./mariadb-centos7.repo
+                    dest=/etc/yum.repos.d/mariadb.repo
+                    backup=yes
+  when:             'ansible_distribution == "CentOS" and ansible_distribution_major_version=="7"'
+
+- name:             Opruimen oude backup bestanden
+  shell:            find /etc/yum.repos.d/ -maxdepth 1 -iname "mariadb-centos7.repo.*@*~" -type f | sort | head -n-2 | xargs rm -f
+  changed_when:     false
+
+- name:             Install MariaDB
+  yum:              name={{ item }}
+                    state=present
+                    enablerepo=mariadb
+  with_items:
+   - MariaDB-compat
+   - MariaDB-client
+   - MariaDB-common
+   - MariaDB-devel
+   - MariaDB-server
+   - MariaDB-shared
+   - MySQL-python
+  notify:           restart mysql
+
+- name:             Start mysql zodat we de user kunnen aanmaken
+  service:          name=mysql
+                    state=started
+
+- name:             MySQL configuratie
+  copy:             src=./server-config/{{ inventory_hostname }}.cnf
+                    dest=/etc/my.cnf.d/server.cnf
+  notify:           restart mysql
+
+- include:          ../../user/tasks/main.yml
+  vars:
+    mysql_user:     root
+    mysql_priv:     '*.*:ALL,GRANT'
+    mysql_hosts:    ['localhost']
+
+- name:             Zet .my.cnf file klaar met root wachtwoord
+  template:         src=client.cnf
+                    dest=~/.my.cnf mode=0600
+
+- include:          ../../user/tasks/main.yml
+  vars:
+    mysql_user:     root
+    mysql_priv:     '*.*:ALL,GRANT'
+    mysql_hosts:    ['127.0.0.1', '::1']
+
+- name:             Anonieme user verwijderen
+  mysql_user:       name=''
+                    host={{ item }}
+                    state=absent
+  with_items:
+   - localhost
+   - "{{ ansible_hostname }}"
+
+- include:          ../../user/tasks/main.yml
+  vars:
+    mysql_user:     jcid_admin
+    mysql_hosts:    ["%"]
+    mysql_priv:     "*.*:ALL,GRANT"
+
+- name:             Remove the MySQL test database
+  mysql_db:         db=test state=absent

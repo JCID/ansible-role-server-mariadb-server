@@ -1,0 +1,43 @@
+#
+# These groups are read by MariaDB server.
+# Use it for options that only the server (but not clients) should see
+#
+# See the examples of server my.cnf files in /usr/share/mysql/
+#
+
+# this is read by the standalone daemon and embedded servers
+[server]
+
+# this is only for the mysqld standalone daemon
+[mysqld]
+query_cache_size                = 8M
+tmp_table_size                  = 16M
+max_heap_table_size             = 16M
+thread_cache_size               = 4
+table_open_cache                = 400
+innodb_buffer_pool_size         = 5G
+innodb_buffer_pool_instances    = 1
+
+# Standaard encoding is utf-8
+character-set-server		    = utf8
+
+# InnoDB per tabel configureren
+innodb_file_per_table
+
+# Slow query log
+#slow_query_log = 1
+#log_output = table
+#log_queries_not_using_indexes = 1
+
+# this is only for embedded server
+[embedded]
+
+# This group is only read by MariaDB servers, not by MySQL.
+# If you use the same .cnf file for MySQL and MariaDB,
+# you can put MariaDB-only options here
+[mariadb]
+
+# This group is only read by MariaDB-10.0 servers.
+# If you use the same .cnf file for MariaDB of different versions,
+# use this group for options that older servers don't understand
+[mariadb-10.0]
